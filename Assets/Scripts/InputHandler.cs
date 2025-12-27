@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 public class InputHandler : MonoBehaviour
 {
-    public PlayerController PlayerControl;
+    public Character Player;
     private InputAction _moveAction, _lookAction, _jumpAction;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -13,20 +13,25 @@ public class InputHandler : MonoBehaviour
         _lookAction = InputSystem.actions.FindAction("Look");
         _jumpAction = InputSystem.actions.FindAction("Jump");
         
-        _jumpAction.performed += OnJumpPerformed;
+        // _jumpAction.performed += OnJumpPerformed;
 
         Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     // Update is called once per frame
     void Update()
     {
-        PlayerControl.Move(_moveAction.ReadValue<Vector2>());
-        PlayerControl.Rotate(_lookAction.ReadValue<Vector2>());
+        Player.Move(_moveAction.ReadValue<Vector2>());
+        Player.Rotate(_lookAction.ReadValue<Vector2>());
+        if (_jumpAction.IsPressed())
+        {
+            Player.Jump();
+        }
     }
 
-    private void OnJumpPerformed(InputAction.CallbackContext context)
-    {
-        PlayerControl.Jump();
-    }
+    // private void OnJumpPerformed(InputAction.CallbackContext context)
+    // {
+    //     PlayerControl.Jump();
+    // }
 }
