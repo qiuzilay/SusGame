@@ -1,9 +1,8 @@
-using System;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(CharacterAnimation))]
-public class Character : MonoBehaviour
+public class CharacterMovement : MonoBehaviour
 {
     public enum MovementStatus
     {
@@ -13,27 +12,27 @@ public class Character : MonoBehaviour
     };
     
     [Header("Movement")]
-    public float WalkSpeed = 3f;
-    public float SprintSpeed = 5f;
-    public float RotationSpeed = 25f;
-    public float JumpForce = 8f;
-    public const float Gravity = -30f;
-    public float DoubleTapTimeThreshold = .5f;
+    [SerializeField] private float WalkSpeed = 3f;
+    [SerializeField] private float SprintSpeed = 5f;
+    [SerializeField] private float RotationSpeed = 25f;
+    [SerializeField] private float JumpForce = 8f;
+    [SerializeField] private const float Gravity = -30f;
+    [SerializeField] private float DoubleTapTimeThreshold = .5f;
 
     [Header("Camera")]
-    public float PitchAngle = 60;
+    [SerializeField] private float PitchAngle = 60;
 
     private CharacterAnimation _characterAnimation;
     private CharacterController _characterControl;
     private MovementStatus _movementStatus;
     private float _lastestTapTime = 0f;
     private Vector3 _velocity = new (0, Gravity, 0);
-    private Transform _anchor;
     private float _rotationX = 0f;
     private float _rotationY = 0f;
+    protected Transform _anchor;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected virtual void Start()
     {
         _characterAnimation = GetComponent<CharacterAnimation>();
         _characterControl = GetComponent<CharacterController>();
@@ -44,7 +43,7 @@ public class Character : MonoBehaviour
     {
         if (_characterControl.isGrounded)
         {
-            // velocity (horizontal) = movement speed * direction vector
+            // velocity (horizontal) = movement speed (at below) * direction vector
             Vector3 horizontalMove = transform.forward * direction.y + transform.right * direction.x;
             
             switch (_movementStatus)
@@ -108,7 +107,7 @@ public class Character : MonoBehaviour
 
     public void Rotate(Vector2 rotationVector)
     {
-        Debug.Log(rotationVector);
+        // Debug.Log(rotationVector);
         rotationVector *= RotationSpeed * Time.deltaTime;
         _rotationY += rotationVector.x;
         transform.localRotation = Quaternion.Euler(0, _rotationY, 0);
