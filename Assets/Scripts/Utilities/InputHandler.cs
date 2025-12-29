@@ -8,7 +8,7 @@ public class InputHandler : MonoBehaviour
     private InputAction _lookAction;
     private InputAction _jumpAction;
     private InputAction _attackAction;
-    private InputAction _useAction;
+    private InputAction _interactAction;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -17,9 +17,9 @@ public class InputHandler : MonoBehaviour
         _lookAction = InputSystem.actions.FindAction("Look");
         _jumpAction = InputSystem.actions.FindAction("Jump");
         _attackAction = InputSystem.actions.FindAction("Attack");
-        _useAction = InputSystem.actions.FindAction("Use");
+        _interactAction = InputSystem.actions.FindAction("Interact");
         
-        _useAction.performed += OnUsePerformed;
+        _interactAction.performed += OnInteractPerformed;
         // _jumpAction.performed += OnJumpPerformed;
 
         Cursor.visible = false;
@@ -37,9 +37,9 @@ public class InputHandler : MonoBehaviour
         }
     }
 
-    private void OnUsePerformed(InputAction.CallbackContext context)
+    private void OnInteractPerformed(InputAction.CallbackContext context)
     {
-        _player.Use();
+        _player.Interact();
     }
 
     // private void OnJumpPerformed(InputAction.CallbackContext context)

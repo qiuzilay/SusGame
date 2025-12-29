@@ -7,7 +7,7 @@ public interface IInteractable
     public void OnInteract();
 }
 
-public interface IUsable : IInteractable
+public interface IPickable : IInteractable
 {
     public void OnPick();
     public void OnUse();
