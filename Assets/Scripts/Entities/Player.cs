@@ -13,7 +13,7 @@ public class Player : CharacterMovement
     [SerializeField][Range(0f, 8f)]
     private float _maxInteractDistance = 4f;
     [SerializeField][Range(0f, 8f)]
-    private float _maxLiftDistance = 1f;
+    private float _maxLiftDistance = 2f;
     [SerializeField]
     private LayerMask _mask;
     
@@ -48,7 +48,8 @@ public class Player : CharacterMovement
         _liftCenter.x = _liftX;
         _liftCenter.y = _liftY;
         _liftCenter.z = _liftZ;
-        _ignoreRaycast = LayerMask.GetMask("Ignore Raycast");
+        _ignoreRaycast = LayerMask.NameToLayer("Ignore Raycast");
+        // Debug.Log(LayerMask.LayerToName(_ignoreRaycast) + ": " + _ignoreRaycast);
     }
 
     private void Update()
@@ -90,6 +91,7 @@ public class Player : CharacterMovement
 
     public void Interact()
     {
+        Debug.Log(_hit.distance);
         if (IsHolding)
         {
             if (_holding.TryGetComponent(out IPickable item))
@@ -97,7 +99,7 @@ public class Player : CharacterMovement
                 DropDown(item);
             }
         }
-        else if (IsAiming)
+        else if (IsAiming && _hit.distance <= _maxLiftDistance)
         {
             if (_aiming.TryGetComponent(out IPickable item))
             {
@@ -109,6 +111,11 @@ public class Player : CharacterMovement
     private void PickUp(IPickable item)
     {
         _holding = _aiming;
+        
+        // process highlight issue
+        item.OnLeaveFocus();
+        _aiming = null;
+
         _holdingRB = _holding.GetComponent<Rigidbody>();
         _temp.linearDamping = _holdingRB.linearDamping;
         _temp.layer = _holding.gameObject.layer;

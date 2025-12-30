@@ -14,6 +14,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
 
     public virtual void OnEnterFocus()
     {
+        Debug.Log(transform.name + ": " + "Enter focus");
         gameObject.layer = _highlightLayer;
     }
 
@@ -21,6 +22,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
 
     public virtual void OnLeaveFocus()
     {
+        Debug.Log(transform.name + ": " + "Leave focus");
         gameObject.layer = __init_Layer;
     }
 }
