@@ -28,8 +28,8 @@ public class Player : CharacterMovement
     private float _liftForce = 10f;
 
     private LayerMask _ignoreRaycast;
-    private Vector3 _liftCenter = new (); 
-    private HoldingItemInfo _temp = new ();
+    private Vector3 _liftCenter; 
+    private HoldingItemInfo _temp;
     private Transform _holding;
     private Rigidbody _holdingRB;
     private Transform _aiming;
@@ -42,7 +42,7 @@ public class Player : CharacterMovement
         get { return _aiming != null; }
     }
 
-    sealed protected override void Start()
+    protected sealed override void Start()
     {
         base.Start();
         _liftCenter.x = _liftX;
@@ -54,8 +54,8 @@ public class Player : CharacterMovement
 
     private void Update()
     {
-        Vector3 origin = _anchor.position;
-        Vector3 direction = _anchor.forward;
+        Vector3 origin = Anchor.position;
+        Vector3 direction = Anchor.forward;
         if (Physics.Raycast(origin, direction, out _hit, _maxInteractDistance))
         {
             if (_aiming != _hit.transform)

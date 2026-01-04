@@ -23,26 +23,27 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float PitchAngle = 60;
 
     private CharacterAnimation _characterAnimation;
-    protected CharacterController _characterControl;
     private MovementStatus _movementStatus;
     private float _lastestTapTime = 0f;
     private Vector3 _velocity = new (0, Gravity, 0);
     private float _rotationX = 0f;
     private float _rotationY = 0f;
-    protected Transform _anchor;
-    public bool IsGrounded => _characterControl.isGrounded;
+    protected Transform Anchor { get; set; }
+    protected CharacterController Controller { get; set; }
+
+    public bool IsGrounded => Controller.isGrounded;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Start()
     {
         _characterAnimation = GetComponent<CharacterAnimation>();
-        _characterControl = GetComponent<CharacterController>();
-        _anchor = transform.Find("Anchor");
+        Controller = GetComponent<CharacterController>();
+        Anchor = transform.Find("Anchor");
     }
 
     public void Move(Vector2 direction)
     {
-        if (_characterControl.isGrounded)
+        if (Controller.isGrounded)
         {
             // velocity (horizontal) = movement speed (at below) * direction vector
             Vector3 horizontalMove = transform.forward * direction.y + transform.right * direction.x;
@@ -103,7 +104,7 @@ public class CharacterMovement : MonoBehaviour
         // displacement = velocity * time
         Vector3 displacement = _velocity * Time.deltaTime;
         // Debug.Log("Displacement: " + displacement);
-        _characterControl.Move(displacement);
+        Controller.Move(displacement);
     }
 
     public void Rotate(Vector2 rotationVector)
@@ -115,13 +116,13 @@ public class CharacterMovement : MonoBehaviour
         if (Mathf.Abs(_rotationX + rotationVector.y) <= PitchAngle)
         {
             _rotationX += rotationVector.y;
-            _anchor.localRotation = Quaternion.Euler(_rotationX, 0, 0);
+            Anchor.localRotation = Quaternion.Euler(_rotationX, 0, 0);
         }
     }
 
     public void Jump()
     {
-        if (_characterControl.isGrounded)
+        if (Controller.isGrounded)
         {
             _velocity.y = JumpForce;
         }
