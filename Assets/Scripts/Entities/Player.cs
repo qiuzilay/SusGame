@@ -91,7 +91,7 @@ public class Player : CharacterMovement
 
     public void Interact()
     {
-        Debug.Log(_hit.distance);
+        // Debug.Log(_hit.distance);
         if (IsHolding)
         {
             if (_holding.TryGetComponent(out IPickable item))

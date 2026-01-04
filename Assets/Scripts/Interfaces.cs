@@ -13,3 +13,10 @@ public interface IPickable : IInteractable
     public void OnUse();
     public void OnDrop();
 }
+
+public interface IState
+{
+    public void OnEnter();
+    public void Trigger();
+    public void OnLeave();
+}

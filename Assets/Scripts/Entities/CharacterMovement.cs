@@ -23,13 +23,14 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float PitchAngle = 60;
 
     private CharacterAnimation _characterAnimation;
-    private CharacterController _characterControl;
+    protected CharacterController _characterControl;
     private MovementStatus _movementStatus;
     private float _lastestTapTime = 0f;
     private Vector3 _velocity = new (0, Gravity, 0);
     private float _rotationX = 0f;
     private float _rotationY = 0f;
     protected Transform _anchor;
+    public bool IsGrounded => _characterControl.isGrounded;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Start()
