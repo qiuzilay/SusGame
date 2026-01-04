@@ -7,11 +7,14 @@ public class NPC : CharacterMovement
     [SerializeField][Range(0f, 1f)]
     private float _jumpBeforeDistance = .5f;
 
-    [SerializeField]
     private Transform _target;
-    private Transform _scanner;
     private NavMeshAgent _agent;
     private Vector3 _bias;
+
+    [SerializeField][Range(0, 5)]
+    private float _giveUpTime = 2f;
+    private bool _isTimerWorking = false;
+    private float _timer;
 
     public bool IsAngry
     {
@@ -21,7 +24,6 @@ public class NPC : CharacterMovement
     sealed protected override void Start()
     {
         base.Start();
-        _scanner = transform.Find("Anchor").Find("Scanner").transform;
         _agent = GetComponent<NavMeshAgent>();
         _agent.updatePosition = false;
         _agent.updateRotation = false;
@@ -33,7 +35,13 @@ public class NPC : CharacterMovement
     {
         _agent.nextPosition = transform.position;
         Decide();
-        // Debug.DrawRay(transform.position + transform.TransformDirection(_bias), transform.forward, Color.red);
+
+        if (_isTimerWorking && (Time.time - _timer >= _giveUpTime))
+        {
+            _target = null;
+            _isTimerWorking = false;
+            // Debug.Log("Exit!");
+        }
     }
 
     private void Decide()
@@ -48,7 +56,7 @@ public class NPC : CharacterMovement
         }
     }
 
-    private void Trace()
+    public void Trace()
     {
         _agent.SetDestination(_target.position);
 
@@ -71,30 +79,54 @@ public class NPC : CharacterMovement
                     Jump();
                 }
             }
-
-            if (_agent.desiredVelocity.sqrMagnitude > .25f)
-            {
-                Vector2 rotation;
-                rotation.x = Vector3.SignedAngle(transform.forward, _agent.desiredVelocity, Vector3.up);
-                rotation.y = 0;
-                Rotate(rotation);
-            }
         }
         else
         {
             Move(Vector2.zero);
         }
+
+        float angle = Vector3.SignedAngle(transform.forward, _agent.desiredVelocity, Vector3.up);
+        if (angle < -5 || 5 < angle)
+        {
+            Vector2 rotation;
+            rotation.x = angle;
+            rotation.y = 0;
+            Rotate(rotation);
+        }
     }
 
-    public void OnTriggerEnter(Collider other) {
-        Debug.Log("Enter!");
+    private bool Inspect(Transform otherTransform)
+    {
+        Vector3 origin = _anchor.position;
+        Vector3 direction = otherTransform.position - transform.position;
+        float maxDistance = direction.magnitude;
+        Debug.DrawRay(origin, direction * maxDistance, Color.red);
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, maxDistance))
+        {
+            if (hit.transform == otherTransform)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public void OnTriggerStay(Collider other) {
-        Debug.Log("Stay!");
+    private void OnTriggerEnter(Collider other)
+    {
+        // nothing
     }
 
-    public void OnTriggerExit(Collider other) {
-        Debug.Log("Exit!");
+    private void OnTriggerStay(Collider other) {
+        if (_target == null && Inspect(other.transform))
+        {
+            _target = other.transform;
+            _isTimerWorking = false;
+            // Debug.Log("Enter!");
+        }
+    }
+
+    private void OnTriggerExit(Collider other) {
+        _isTimerWorking = true;
+        _timer = Time.time;
     }
 }
