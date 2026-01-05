@@ -52,7 +52,7 @@ public class Enemy : NPCBase
                 else if (Random.value > .45f)
                 {
                     int angle = Random.Range(-90, 90);
-                    _faceTo = _enemy.transform.position + (Quaternion.AngleAxis(angle, _enemy.transform.up) * _enemy.transform.forward);
+                    _faceTo = Quaternion.AngleAxis(angle, _enemy.transform.up) * _enemy.transform.forward;
                     _isRotating = true;
                 }
             }
@@ -79,11 +79,11 @@ public class Enemy : NPCBase
             if (_enemy.IsAngry)
             {
                 _enemy.MoveTo(_enemy.Target.position);
-                _enemy.FaceTo(_enemy.Target.position);
+                _enemy.FaceTo(_enemy.DesiredVelocity);
             }
             else
             {
-                _enemy.MoveTo(_enemy.transform.position);
+                _enemy.Move(Vector2.zero);  // brake
                 _enemy.SwitchTo(StateType.Idle);
             }
         }

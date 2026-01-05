@@ -79,12 +79,13 @@ public abstract class NPCBase : CharacterMovement
 
     [Header("Behaviours")]
     [SerializeField][Range(0f, 5f)]
-    private float _giveUpTime = 1.5f;
+    private float _giveUpTime = 3f;
 
     private NavMeshAgent _agent;
     private Vector3 _bias;
     private bool _isTimerWorking = false;
     private float _timer;
+    protected Vector3 DesiredVelocity => _agent.desiredVelocity;
     protected Transform Target { get; set; }
     protected StateBase CurrState { get; private set; }
     protected StateBase NextState { get; set; }
@@ -134,7 +135,9 @@ public abstract class NPCBase : CharacterMovement
     {
         _agent.SetDestination(position);
 
-        if (_agent.remainingDistance > _agent.stoppingDistance)
+        Debug.Log("remainingDistance: " + _agent.remainingDistance);
+
+        if (_agent.pathPending || _agent.remainingDistance > _agent.stoppingDistance)
         {
             Vector2 direction;
             {
@@ -143,8 +146,8 @@ public abstract class NPCBase : CharacterMovement
                 direction.y = localDirection.z;
             }
             
+            Debug.Log("direction: " + direction);
             Move(direction);
-            // Debug.Log(_agent.remainingDistance);
 
             if (Physics.Raycast(transform.position + transform.TransformDirection(_bias), transform.forward, _jumpBeforeDistance))
             {
@@ -162,9 +165,8 @@ public abstract class NPCBase : CharacterMovement
         }
     }
 
-    protected bool FaceTo(Vector3 position, float stopThreshold = 1f)
+    protected bool FaceTo(Vector3 direction, float stopThreshold = 1f)
     {
-        Vector3 direction = position - transform.position;
         direction.y = 0;
 
         if (direction.sqrMagnitude > 0.01f)
@@ -202,7 +204,7 @@ public abstract class NPCBase : CharacterMovement
         return false;
     }
     private void OnTriggerStay(Collider other) {
-        if (Target == null && Inspect(other.transform))
+        if ((_isTimerWorking || !IsAngry) && Inspect(other.transform))
         {
             Target = other.transform;
             _isTimerWorking = false;
@@ -210,7 +212,7 @@ public abstract class NPCBase : CharacterMovement
         }
     }
     private void OnTriggerExit(Collider other) {
-        _isTimerWorking = true;
         _timer = Time.time;
+        _isTimerWorking = true;
     }
 }
