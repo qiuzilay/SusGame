@@ -71,24 +71,25 @@ public abstract class StateBase : IState
 [RequireComponent(typeof(NavMeshAgent))]
 public abstract class NPCBase : CharacterMovement
 {
-    [Header("Movements")]
+    [Header("Behaviours")]
     [SerializeField][Range(0f, 1f)]
     private float _jumpBeforeDistance = .5f;
     [SerializeField][Range(0f, 10f)]
     private float _rotationDamping = 5f;
-
-    [Header("Behaviours")]
     [SerializeField][Range(0f, 5f)]
     private float _giveUpTime = 3f;
 
     private NavMeshAgent _agent;
     private Vector3 _bias;
-    private bool _isTimerWorking = false;
     private float _timer;
     protected Vector3 DesiredVelocity => _agent.desiredVelocity;
     protected Transform Target { get; set; }
     protected StateBase CurrState { get; private set; }
+    protected StateBase PrevState { get; set; }
     protected StateBase NextState { get; set; }
+
+    public bool IsTimerWorking { get; private set; } = false;
+    public bool IsTracking => _agent.pathPending || _agent.desiredVelocity.sqrMagnitude >= 0.01f;
     
     public bool IsAngry
     {
@@ -109,10 +110,10 @@ public abstract class NPCBase : CharacterMovement
     {
         _agent.nextPosition = transform.position;
 
-        if (_isTimerWorking && (Time.time - _timer >= _giveUpTime))
+        if (IsTimerWorking && (Time.time - _timer >= _giveUpTime))
         {
             Target = null;
-            _isTimerWorking = false;
+            IsTimerWorking = false;
             // Debug.Log("Exit!");
         }
 
@@ -135,7 +136,7 @@ public abstract class NPCBase : CharacterMovement
     {
         _agent.SetDestination(position);
 
-        Debug.Log("remainingDistance: " + _agent.remainingDistance);
+        // Debug.Log("remainingDistance: " + _agent.remainingDistance);
 
         if (_agent.pathPending || _agent.remainingDistance > _agent.stoppingDistance)
         {
@@ -146,7 +147,7 @@ public abstract class NPCBase : CharacterMovement
                 direction.y = localDirection.z;
             }
             
-            Debug.Log("direction: " + direction);
+            // Debug.Log("direction: " + direction);
             Move(direction);
 
             if (Physics.Raycast(transform.position + transform.TransformDirection(_bias), transform.forward, _jumpBeforeDistance))
@@ -204,15 +205,15 @@ public abstract class NPCBase : CharacterMovement
         return false;
     }
     private void OnTriggerStay(Collider other) {
-        if ((_isTimerWorking || !IsAngry) && Inspect(other.transform))
+        if ((IsTimerWorking || !IsAngry) && Inspect(other.transform))
         {
             Target = other.transform;
-            _isTimerWorking = false;
+            IsTimerWorking = false;
             // Debug.Log("Target: " + Target.name);
         }
     }
     private void OnTriggerExit(Collider other) {
         _timer = Time.time;
-        _isTimerWorking = true;
+        IsTimerWorking = true;
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Enemy : NPCBase
 {
@@ -7,14 +8,15 @@ public class Enemy : NPCBase
     {
         Idle,
         Patrol,
-        Angry
+        Angry,
+        Confuse
     }
 
     private class IdleState : StateBase
     {
-        private Enemy _enemy;
+        private readonly Enemy _enemy;
         private float _lastAttempTime;
-        private bool _isRotating = false;
+        private bool _isRotating;
         private Vector3 _faceTo;
 
         public IdleState(Enemy enemy)
@@ -26,6 +28,7 @@ public class Enemy : NPCBase
         {
             base.OnEnter();
             _lastAttempTime = Time.time;
+            _isRotating = false;
             Debug.Log("Idle!");
         }
 
@@ -44,10 +47,10 @@ public class Enemy : NPCBase
             }
             else if (Time.time - _lastAttempTime > 5f)
             {
-                if (Random.value > .95f)
+                // Debug.Log(_enemy._patrolChance);
+                if (Random.value < _enemy._patrolChance)
                 {
-                    Debug.Log("Patrol!");
-                    // _enemy.SwitchTo(StateType.Patrol);
+                    _enemy.SwitchTo(StateType.Patrol);
                 }
                 else if (Random.value > .45f)
                 {
@@ -57,12 +60,11 @@ public class Enemy : NPCBase
                 }
             }
         }
-        public override void OnLeave() {}
     }
 
     private class AngryState : StateBase
     {
-        private Enemy _enemy;
+        private readonly Enemy _enemy;
 
         public AngryState(Enemy enemy)
         {
@@ -71,6 +73,7 @@ public class Enemy : NPCBase
 
         public override void OnEnter()
         {
+            base.OnEnter();
             Debug.Log("Angry!");
         }
 
@@ -84,13 +87,124 @@ public class Enemy : NPCBase
             else
             {
                 _enemy.Move(Vector2.zero);  // brake
-                _enemy.SwitchTo(StateType.Idle);
+                _enemy.SwitchTo(StateType.Confuse);
             }
         }
-
-        public override void OnLeave() {}
     }
 
+    private class ConfuseState : StateBase
+    {
+        private readonly Enemy _enemy;
+        private bool _isRotating;
+        private int _lastRotateAngle;
+        private Vector3 _faceTo;
+
+        public ConfuseState(Enemy enemy)
+        {
+            _enemy = enemy;
+        }
+
+        public override void OnEnter()
+        {
+            base.OnEnter();
+            _lastRotateAngle = 0;
+            _isRotating = false;
+            Debug.Log("Confuse!");
+        }
+
+        public override void Trigger()
+        {
+            if (_enemy.IsAngry)
+            {
+                _enemy.SwitchTo(StateType.Angry);
+            }
+            else if (_isRotating)
+            {
+                _isRotating = !_enemy.FaceTo(_faceTo);
+            }
+            else if (RunTime < 3f)
+            {
+                int angle;
+                if (_lastRotateAngle <= 0)  // turn right
+                {
+                    angle = Random.Range(40, 50);
+                }
+                else                        // turn left
+                {
+                    angle = Random.Range(-40, -50);
+                }
+                _faceTo = Quaternion.AngleAxis(-_lastRotateAngle + angle, _enemy.transform.up) * _enemy.transform.forward;
+                _isRotating = true;
+                _lastRotateAngle = angle;
+                // Debug.Log("Inspect Angle: " + angle);
+            }
+            else
+            {
+                _enemy.SwitchTo(StateType.Patrol);
+            }
+        }
+    }
+
+    private class PatrolState : StateBase
+    {
+        private readonly Enemy _enemy;
+        private bool _isMoving;
+        private Vector3 _moveTo;
+        private int _lastUsed = 0;
+
+        public PatrolState(Enemy enemy) {
+            _enemy = enemy;
+        }
+
+        public override void OnEnter()
+        {
+            base.OnEnter();
+            _isMoving = true;
+            {
+                List<int> filter;
+                if (_enemy.PrevState is AngryState)
+                {
+                    filter = Enumerable.Range(0, _enemy._locations.Count)
+                                       .ToList();
+                }
+                else
+                {
+                    filter = Enumerable.Range(0, _enemy._locations.Count)
+                                       .Where(i => i != _lastUsed)
+                                       .ToList();
+                }
+                int index = filter[Random.Range(0, filter.Count)];
+                _moveTo = _enemy._locations[index];
+                _lastUsed = index;
+            }
+            Debug.Log("Patrol! (" + _moveTo + ")");
+        }
+
+        public override void Trigger()
+        {
+            if (_enemy.IsAngry)
+            {
+                _enemy.SwitchTo(StateType.Angry);
+            }
+            else if (_isMoving)
+            {
+                // Debug.Log("_isMoving: " + _isMoving + ", IsTracking: " + _enemy.IsTracking);
+                _isMoving = !_enemy.MoveTo(_moveTo);
+                _enemy.FaceTo(_enemy.DesiredVelocity);
+            }
+            else
+            {
+                _enemy.SwitchTo(StateType.Idle);
+            }
+            
+        }
+    }
+
+    [Header("Behaviours")]
+    [SerializeField]
+    private List<Vector3> _locations;
+    [SerializeField][Range(0.01f, .20f)]
+    private float _patrolChance = .1f;
 
     private Dictionary<StateType, StateBase> _stateTable;
 
@@ -98,9 +212,11 @@ public class Enemy : NPCBase
     {
         base.Start();
         _stateTable = new Dictionary<StateType, StateBase>();
-        _stateTable.EnsureCapacity(3);
+        _stateTable.EnsureCapacity(4);
         _stateTable.Add(StateType.Idle, new IdleState(this));
         _stateTable.Add(StateType.Angry, new AngryState(this));
+        _stateTable.Add(StateType.Patrol, new PatrolState(this));
+        _stateTable.Add(StateType.Confuse, new ConfuseState(this));
 
         SwitchTo(StateType.Idle);
     }
@@ -108,6 +224,7 @@ public class Enemy : NPCBase
     private void SwitchTo(StateType stateType)
     {
         _stateTable.TryGetValue(stateType, out StateBase state);
+        PrevState = CurrState;
         NextState = state;
     }
 }

@@ -12,12 +12,12 @@ public class CharacterMovement : MonoBehaviour
     };
     
     [Header("Movement")]
-    [SerializeField] private float WalkSpeed = 3f;
-    [SerializeField] private float SprintSpeed = 5f;
-    [SerializeField] private float RotationSpeed = 25f;
-    [SerializeField] private float JumpForce = 8f;
-    [SerializeField] private const float Gravity = -30f;
-    [SerializeField] private float DoubleTapTimeThreshold = .5f;
+    [SerializeField] private float _walkSpeed = 3f;
+    [SerializeField] private float _sprintSpeed = 5f;
+    [SerializeField] private float _rotationSpeed = 25f;
+    [SerializeField] private float _jumpForce = 8f;
+    [SerializeField] private float _doubleTapTimeThreshold = .5f;
+    private const float _gravity = -30f;
 
     [Header("Camera")]
     [SerializeField] private float PitchAngle = 60;
@@ -25,7 +25,7 @@ public class CharacterMovement : MonoBehaviour
     private CharacterAnimation _characterAnimation;
     private MovementStatus _movementStatus;
     private float _lastestTapTime = 0f;
-    private Vector3 _velocity = new (0, Gravity, 0);
+    private Vector3 _velocity = new (0, _gravity, 0);
     private float _rotationX = 0f;
     private float _rotationY = 0f;
     protected Transform Anchor { get; set; }
@@ -55,7 +55,7 @@ public class CharacterMovement : MonoBehaviour
                     {
                         float diff = Time.time - _lastestTapTime;
                         _lastestTapTime = Time.time;
-                        if (diff <= DoubleTapTimeThreshold && direction == Vector2.up)
+                        if (diff <= _doubleTapTimeThreshold && direction == Vector2.up)
                         {
                             _movementStatus = MovementStatus.Sprinting;
                             _characterAnimation.Sprint();
@@ -78,7 +78,7 @@ public class CharacterMovement : MonoBehaviour
                         _movementStatus = MovementStatus.Idleling;
                         goto case MovementStatus.Idleling;
                     }
-                    horizontalMove *= WalkSpeed;
+                    horizontalMove *= _walkSpeed;
                     break;
 
                 case MovementStatus.Sprinting:
@@ -87,7 +87,7 @@ public class CharacterMovement : MonoBehaviour
                         _characterAnimation.Idle();
                         _movementStatus = MovementStatus.Idleling;
                     }
-                    horizontalMove *= SprintSpeed;
+                    horizontalMove *= _sprintSpeed;
                     break;
             }
             
@@ -97,8 +97,8 @@ public class CharacterMovement : MonoBehaviour
         }
         else
         {
-            // velocity (vertical) = acceleration (gravity) * time;
-            _velocity.y += Gravity * Time.deltaTime;
+            // velocity (vertical) = acceleration (_gravity) * time;
+            _velocity.y += _gravity * Time.deltaTime;
         }
 
         // displacement = velocity * time
@@ -110,7 +110,7 @@ public class CharacterMovement : MonoBehaviour
     public void Rotate(Vector2 rotationVector)
     {
         // Debug.Log(rotationVector);
-        rotationVector *= RotationSpeed * Time.deltaTime;
+        rotationVector *= _rotationSpeed * Time.deltaTime;
         _rotationY += rotationVector.x;
         transform.localRotation = Quaternion.Euler(0, _rotationY, 0);
         if (Mathf.Abs(_rotationX + rotationVector.y) <= PitchAngle)
@@ -124,7 +124,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (Controller.isGrounded)
         {
-            _velocity.y = JumpForce;
+            _velocity.y = _jumpForce;
         }
     }
 }
