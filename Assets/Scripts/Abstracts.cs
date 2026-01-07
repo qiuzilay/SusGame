@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public abstract class InteractableBase : MonoBehaviour, IInteractable
+public abstract class HighlightableBase : MonoBehaviour, IHighlightable
 {
-    protected int __init_Layer;
+    protected int _initLayer;
     protected int _highlightLayer;
 
     protected virtual void Start()
     {
-        __init_Layer = gameObject.layer;
+        _initLayer = gameObject.layer;
         _highlightLayer = LayerMask.NameToLayer("Highlight");
     }
 
@@ -18,26 +18,34 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
         gameObject.layer = _highlightLayer;
     }
 
-    public abstract void OnInteract();
-
     public virtual void OnLeaveFocus()
     {
         // Debug.Log(transform.name + ": " + "Leave focus");
-        gameObject.layer = __init_Layer;
+        gameObject.layer = _initLayer;
     }
 }
 
-[RequireComponent(typeof(Rigidbody))]
-public abstract class PickableBase : InteractableBase, IPickable
+public abstract class InteractableBase : HighlightableBase, IInteractable
 {
-    private bool __init_useGravity;
+    [SerializeField]
+    protected string _hintFailed;
+    [SerializeField]
+    protected string _hintSuccessed;
+
+    public abstract string OnInteract(Transform item);
+}
+
+[RequireComponent(typeof(Rigidbody))]
+public abstract class PickableBase : HighlightableBase, IPickable
+{
+    private bool _initUseGravity;
     protected Rigidbody _rigidbody;
 
     protected override void Start()
     {
         base.Start();
         _rigidbody = GetComponent<Rigidbody>();
-        __init_useGravity = _rigidbody.useGravity;
+        _initUseGravity = _rigidbody.useGravity;
     }
 
     public virtual void OnPick()
@@ -50,7 +58,7 @@ public abstract class PickableBase : InteractableBase, IPickable
     
     public virtual void OnDrop()
     {
-        _rigidbody.useGravity = __init_useGravity;
+        _rigidbody.useGravity = _initUseGravity;
         _rigidbody.constraints = RigidbodyConstraints.None;
     }
 }

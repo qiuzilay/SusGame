@@ -9,6 +9,7 @@ public class InputHandler : MonoBehaviour
     private InputAction _jumpAction;
     private InputAction _attackAction;
     private InputAction _interactAction;
+    private InputAction _useAction;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -18,8 +19,12 @@ public class InputHandler : MonoBehaviour
         _jumpAction = InputSystem.actions.FindAction("Jump");
         _attackAction = InputSystem.actions.FindAction("Attack");
         _interactAction = InputSystem.actions.FindAction("Interact");
+        _useAction = InputSystem.actions.FindAction("Use");
         
         _interactAction.performed += OnInteractPerformed;
+        _useAction.started += OnUsePressed;
+        _useAction.performed += OnUsePerformed;
+        _useAction.canceled += OnUseReleased;
         // _jumpAction.performed += OnJumpPerformed;
 
         Cursor.visible = false;
@@ -35,13 +40,28 @@ public class InputHandler : MonoBehaviour
         {
             _player.Jump();
         }
+        if (_useAction.IsPressed())
+        {
+            _player.Use();
+        }
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
         _player.Interact();
     }
-
+    private void OnUsePressed(InputAction.CallbackContext context)
+    {
+        _player.PressUse();
+    }
+    private void OnUsePerformed(InputAction.CallbackContext context)
+    {
+        _player.Use();
+    }
+    private void OnUseReleased(InputAction.CallbackContext context)
+    {
+        _player.ReleaseUse();
+    }
     // private void OnJumpPerformed(InputAction.CallbackContext context)
     // {
     //     PlayerControl.Jump();

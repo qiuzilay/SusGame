@@ -16,8 +16,10 @@ public class Player : CharacterMovement
     private float _maxLiftDistance = 2f;
     [SerializeField]
     private LayerMask _mask;
+    [SerializeField][Range(0f, 5f)]
+    private float _pressThreshold = 1f;
     
-    [Header("Appearances")]
+    [Header("Behaviours")]
     [SerializeField][Range(-.5f, .5f)]
     private float _liftX = 0f;
     [SerializeField][Range(0f, 2f)]
@@ -35,6 +37,11 @@ public class Player : CharacterMovement
     private Transform _aiming;
     private RaycastHit _hit;
 
+    
+    private float _startPressingTime;
+    private bool _isTrigger = false;
+    private GUIManager _gui;
+
     public bool IsHolding {
         get { return _holding != null; }
     }
@@ -49,6 +56,7 @@ public class Player : CharacterMovement
         _liftCenter.y = _liftY;
         _liftCenter.z = _liftZ;
         _ignoreRaycast = LayerMask.NameToLayer("Ignore Raycast");
+        _gui = GameObject.Find("GUI").GetComponent<GUIManager>();
         // Debug.Log(LayerMask.LayerToName(_ignoreRaycast) + ": " + _ignoreRaycast);
     }
 
@@ -60,13 +68,21 @@ public class Player : CharacterMovement
         {
             if (_aiming != _hit.transform)
             {
-                if (IsAiming && _aiming.TryGetComponent(out IInteractable item))
+                if (IsAiming && _aiming.TryGetComponent(out IHighlightable item))
                 {
                     item.OnLeaveFocus();
+                    if (item is IInteractable)
+                    {
+                        _gui.DisableHintImage();
+                    }
                 }
                 if ((_aiming = _hit.transform).TryGetComponent(out item))
                 {
                     item.OnEnterFocus();
+                    if (item is IInteractable)
+                    {
+                        _gui.EnableHintImage();
+                    }
                 }
             }
         }
@@ -74,9 +90,13 @@ public class Player : CharacterMovement
         {
             if (IsAiming)
             {
-                if (_aiming.TryGetComponent(out IInteractable item))
+                if (_aiming.TryGetComponent(out IHighlightable item))
                 {
                     item.OnLeaveFocus();
+                    if (item is IInteractable)
+                    {
+                        _gui.DisableHintImage();
+                    }
                 }
                 _aiming = null;
             }
@@ -107,6 +127,33 @@ public class Player : CharacterMovement
             }
         }
     }
+    
+    public void PressUse()
+    {
+        if (IsAiming && _aiming.TryGetComponent(out IInteractable item))
+        {
+            _gui.IsPressing = true;
+            _startPressingTime = Time.time;
+        }
+    }
+    public void ReleaseUse()
+    {
+        _gui.IsPressing = false;
+        _isTrigger = false;
+    }
+    public void Use()
+    {
+        if (IsAiming && _aiming.TryGetComponent(out IInteractable item))
+        {
+            if (!_isTrigger && _gui.IsPressing && Time.time - _startPressingTime >= _pressThreshold)
+            {
+                // Debug.Log("Use!");
+                _isTrigger = true;
+                _gui.SetHintBar(item.OnInteract(_holding));
+                _gui.DisableHintImage();
+            }
+        }
+    } 
 
     private void PickUp(IPickable item)
     {
@@ -125,8 +172,6 @@ public class Player : CharacterMovement
         _holding.parent = transform;
         item.OnPick();
     }
-
-
     private void DropDown(IPickable item)
     {
         item.OnDrop();

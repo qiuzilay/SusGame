@@ -1,13 +1,17 @@
 using UnityEngine;
 
-public interface IInteractable
+public interface IHighlightable
 {
     public void OnEnterFocus();
     public void OnLeaveFocus();
-    public void OnInteract();
 }
 
-public interface IPickable : IInteractable
+public interface IInteractable : IHighlightable
+{
+    public string OnInteract(Transform item);
+}
+
+public interface IPickable : IHighlightable
 {
     public void OnPick();
     public void OnUse();

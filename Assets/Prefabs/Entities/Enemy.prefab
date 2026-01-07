@@ -113,7 +113,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 1
+  m_StoppingDistance: 1.2
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -160,15 +160,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de10851a9c63b94f8cb4e9458858fc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPC
-  WalkSpeed: 3
-  SprintSpeed: 5
-  RotationSpeed: 25
-  JumpForce: 8
-  DoubleTapTimeThreshold: 0.5
+  _walkSpeed: 3
+  _sprintSpeed: 5
+  _rotationSpeed: 25
+  _jumpForce: 8
+  _doubleTapTimeThreshold: 0.5
   PitchAngle: 60
   _jumpBeforeDistance: 0.5
   _rotationDamping: 5
   _giveUpTime: 1.5
+  _locations: []
+  _patrolChance: 0.1
 --- !u!1 &2559625378560525446
 GameObject:
   m_ObjectHideFlags: 0
