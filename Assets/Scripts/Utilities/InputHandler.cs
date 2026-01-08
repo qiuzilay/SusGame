@@ -20,15 +20,47 @@ public class InputHandler : MonoBehaviour
         _attackAction = InputSystem.actions.FindAction("Attack");
         _interactAction = InputSystem.actions.FindAction("Interact");
         _useAction = InputSystem.actions.FindAction("Use");
+
+        _moveAction?.Enable();
+        _lookAction?.Enable();
+        _jumpAction?.Enable();
+        _attackAction?.Enable();
+        _interactAction?.Enable();
+        _useAction?.Enable();
         
         _interactAction.performed += OnInteractPerformed;
         _useAction.started += OnUsePressed;
         _useAction.performed += OnUsePerformed;
         _useAction.canceled += OnUseReleased;
+        // _attackAction.started += OnAttackStarted;
         // _jumpAction.performed += OnJumpPerformed;
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    void OnDestroy()
+    {
+        if (_interactAction != null)
+        {
+            _interactAction.performed -= OnInteractPerformed;
+            _interactAction.Disable();
+        }
+        if (_useAction != null)
+        {
+            _useAction.started -= OnUsePressed;
+            _useAction.performed -= OnUsePerformed;
+            _useAction.canceled -= OnUseReleased;
+            _useAction.Disable();
+        }
+        _moveAction?.Disable();
+        _lookAction?.Disable();
+        _jumpAction?.Disable();
+        _attackAction?.Disable();
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        // Debug.Log("Destroy!");
     }
 
     // Update is called once per frame
@@ -66,4 +98,9 @@ public class InputHandler : MonoBehaviour
     // {
     //     PlayerControl.Jump();
     // }
+    private void OnAttackStarted(InputAction.CallbackContext context) // for debug used
+    {
+        // var gui = GameObject.Find("GUI").GetComponent<GUIManager>();
+        // gui.OnGameOver(true);
+    } 
 }

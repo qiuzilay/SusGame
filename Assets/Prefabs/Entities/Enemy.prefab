@@ -31,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 2001509514305014496}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8, y: 0, z: -5.08}
+  m_LocalPosition: {x: 8, y: 0, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -76,7 +76,7 @@ Animator:
   m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 2861491c66ecdbb44b33aeef0027374f, type: 2}
-  m_CullingMode: 0
+  m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
@@ -168,8 +168,10 @@ MonoBehaviour:
   PitchAngle: 60
   _jumpBeforeDistance: 0.5
   _rotationDamping: 5
-  _giveUpTime: 1.5
-  _locations: []
+  _giveUpTime: 3
+  _locations:
+  - {x: 8, y: 0, z: -5}
+  - {x: 8, y: 0, z: 3}
   _patrolChance: 0.1
 --- !u!1 &2559625378560525446
 GameObject:
@@ -695,7 +697,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 9641
+  m_VersionIndex: 9677
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []

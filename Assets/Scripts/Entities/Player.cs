@@ -56,8 +56,12 @@ public class Player : CharacterMovement
         _liftCenter.y = _liftY;
         _liftCenter.z = _liftZ;
         _ignoreRaycast = LayerMask.NameToLayer("Ignore Raycast");
-        _gui = GameObject.Find("GUI").GetComponent<GUIManager>();
         // Debug.Log(LayerMask.LayerToName(_ignoreRaycast) + ": " + _ignoreRaycast);
+        _gui = GameObject.Find("GUI").GetComponent<GUIManager>();
+        
+        Collider playerCollider = GetComponent<Collider>(); 
+        Collider sphereCollider = transform.Find("Sphere").GetComponent<Collider>();
+        Physics.IgnoreCollision(playerCollider, sphereCollider);
     }
 
     private void Update()
@@ -192,6 +196,15 @@ public class Player : CharacterMovement
         else if (bias.magnitude > .1f)
         {
             _holdingRB.AddForce(bias * _liftForce);
+        }
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        // Debug.Log(other.name + ": " + LayerMask.LayerToName(other.gameObject.layer));
+        if (other.transform.TryGetComponent(out Enemy enemy))
+        {
+            _gui.OnGameOver(false);
         }
     }
 }
