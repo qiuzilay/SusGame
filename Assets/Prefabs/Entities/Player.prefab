@@ -552,7 +552,7 @@ MonoBehaviour:
   _doubleTapTimeThreshold: 0.5
   PitchAngle: 60
   _maxInteractDistance: 4
-  _maxLiftDistance: 1
+  _maxLiftDistance: 2
   _mask:
     serializedVersion: 2
     m_Bits: 0

@@ -12,18 +12,21 @@ public class CharacterAnimation : MonoBehaviour
 
     public void Idle()
     {
+        // Debug.Log("Animation: Idle");
         _animator.SetBool("isWalking", false);
         _animator.SetBool("isSprinting", false);
     }
 
     public void Walk()
     {
+        // Debug.Log("Animation: Walk");
         _animator.SetBool("isWalking", true);
         _animator.SetBool("isSprinting", false);
     }
 
     public void Sprint()
     {
+        // Debug.Log("Animation: Sprint");
         _animator.SetBool("isWalking", true);
         _animator.SetBool("isSprinting", true);
     }

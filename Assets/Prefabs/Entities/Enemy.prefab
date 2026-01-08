@@ -113,11 +113,11 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 1.2
+  m_StoppingDistance: 0.5
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 2
+  m_Height: 2.2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
@@ -169,9 +169,7 @@ MonoBehaviour:
   _jumpBeforeDistance: 0.5
   _rotationDamping: 5
   _giveUpTime: 3
-  _locations:
-  - {x: 8, y: 0, z: -5}
-  - {x: 8, y: 0, z: 3}
+  Location: []
   _patrolChance: 0.1
 --- !u!1 &2559625378560525446
 GameObject:

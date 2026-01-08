@@ -4,7 +4,7 @@ using System.Linq;
 
 public class Enemy : NPCBase
 {
-    private enum StateType
+    public enum StateType
     {
         Idle,
         Patrol,
@@ -162,19 +162,19 @@ public class Enemy : NPCBase
             _isMoving = true;
             {
                 List<int> filter;
-                if (_enemy.PrevState is AngryState)
+                if (_enemy.PrevState is AngryState || _enemy.Location.Count < 2)
                 {
-                    filter = Enumerable.Range(0, _enemy._locations.Count)
+                    filter = Enumerable.Range(0, _enemy.Location.Count)
                                        .ToList();
                 }
                 else
                 {
-                    filter = Enumerable.Range(0, _enemy._locations.Count)
+                    filter = Enumerable.Range(0, _enemy.Location.Count)
                                        .Where(i => i != _lastUsed)
                                        .ToList();
                 }
                 int index = filter[Random.Range(0, filter.Count)];
-                _moveTo = _enemy._locations[index];
+                _moveTo = _enemy.Location[index];
                 _lastUsed = index;
             }
             Debug.Log("Patrol! (" + _moveTo + ")");
@@ -194,6 +194,8 @@ public class Enemy : NPCBase
             }
             else
             {
+                _enemy.Move(Vector2.zero);
+                // Debug.Log(_enemy.DesiredVelocity);
                 _enemy.SwitchTo(StateType.Idle);
             }
             
@@ -201,8 +203,7 @@ public class Enemy : NPCBase
     }
 
     [Header("Behaviours")]
-    [SerializeField]
-    private List<Vector3> _locations;
+    public List<Vector3> Location;
     [SerializeField][Range(0.01f, .20f)]
     private float _patrolChance = .1f;
 
@@ -221,7 +222,7 @@ public class Enemy : NPCBase
         SwitchTo(StateType.Idle);
     }
 
-    private void SwitchTo(StateType stateType)
+    public void SwitchTo(StateType stateType)
     {
         _stateTable.TryGetValue(stateType, out StateBase state);
         PrevState = CurrState;

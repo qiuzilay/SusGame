@@ -99,6 +99,16 @@ public class CharacterMovement : MonoBehaviour
         {
             // velocity (vertical) = acceleration (_gravity) * time;
             _velocity.y += _gravity * Time.deltaTime;
+            if (direction.x == 0 && direction.y == 0)
+            {
+                _characterAnimation.Idle();
+                _movementStatus = MovementStatus.Idleling;
+            }
+            else if (_movementStatus != MovementStatus.Sprinting)
+            {
+                _characterAnimation.Walk();
+                _movementStatus = MovementStatus.Walking;
+            }
         }
 
         // displacement = velocity * time

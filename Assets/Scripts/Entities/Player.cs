@@ -153,6 +153,7 @@ public class Player : CharacterMovement
             {
                 // Debug.Log("Use!");
                 _isTrigger = true;
+                Debug.Log($"Name: {_aiming.name}");
                 _gui.SetHintBar(item.OnInteract(_holding));
                 _gui.DisableHintImage();
             }

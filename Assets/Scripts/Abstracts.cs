@@ -1,27 +1,74 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Collider))]
 public abstract class HighlightableBase : MonoBehaviour, IHighlightable
 {
+    public class Properties : MonoBehaviour
+    {
+        private int _initLayer;
+        private int _highlightLayer;
+        
+        private void Start()
+        {
+            _initLayer = gameObject.layer;
+            _highlightLayer = LayerMask.NameToLayer("Highlight");
+        }
+
+        public void OnEnter()
+        {
+            gameObject.layer = _highlightLayer;
+        }
+
+        public void OnLeave()
+        {
+            gameObject.layer = _initLayer;
+        }
+    }
+
     protected int _initLayer;
     protected int _highlightLayer;
+    protected Properties[] _children;
+    protected Rigidbody _rigidbody;
+
 
     protected virtual void Start()
     {
         _initLayer = gameObject.layer;
         _highlightLayer = LayerMask.NameToLayer("Highlight");
+        
+        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody.useGravity = true;
+        _rigidbody.isKinematic = false;
+
+        Transform[] children = transform.GetComponentsInChildren<Transform>();
+        Array.Resize(ref _children, children.Length);
+        for (int i = 0; i < children.Length; i++)
+        {
+            _children[i] = children[i].gameObject.AddComponent<Properties>();
+        }
     }
 
     public virtual void OnEnterFocus()
     {
         // Debug.Log(transform.name + ": " + "Enter focus");
         gameObject.layer = _highlightLayer;
+        foreach (var child in _children)
+        {
+            child.OnEnter();
+        }
     }
 
     public virtual void OnLeaveFocus()
     {
         // Debug.Log(transform.name + ": " + "Leave focus");
         gameObject.layer = _initLayer;
+        foreach (var child in _children)
+        {
+            child.OnLeave();
+        }
     }
 }
 
@@ -35,18 +82,8 @@ public abstract class InteractableBase : HighlightableBase, IInteractable
     public abstract string OnInteract(Transform item);
 }
 
-[RequireComponent(typeof(Rigidbody))]
 public abstract class PickableBase : HighlightableBase, IPickable
 {
-    private bool _initUseGravity;
-    protected Rigidbody _rigidbody;
-
-    protected override void Start()
-    {
-        base.Start();
-        _rigidbody = GetComponent<Rigidbody>();
-        _initUseGravity = _rigidbody.useGravity;
-    }
 
     public virtual void OnPick()
     {
@@ -58,7 +95,7 @@ public abstract class PickableBase : HighlightableBase, IPickable
     
     public virtual void OnDrop()
     {
-        _rigidbody.useGravity = _initUseGravity;
+        _rigidbody.useGravity = true;
         _rigidbody.constraints = RigidbodyConstraints.None;
     }
 }
@@ -158,7 +195,7 @@ public abstract class NPCBase : CharacterMovement
             // Debug.Log("direction: " + direction);
             Move(direction);
 
-            if (Physics.Raycast(transform.position + transform.TransformDirection(_bias), transform.forward, _jumpBeforeDistance))
+            if (Physics.CapsuleCast(transform.position, transform.position + (Vector3.up * 2), .5f, transform.forward, _jumpBeforeDistance))
             {
                 if (IsGrounded)
                 {
@@ -205,7 +242,7 @@ public abstract class NPCBase : CharacterMovement
         Debug.DrawRay(origin, direction * maxDistance, Color.red);
         if (Physics.Raycast(origin, direction, out RaycastHit hit, maxDistance))
         {
-            if (hit.transform == otherTransform)
+            if (hit.transform == otherTransform && otherTransform.name == "Player")
             {
                 return true;
             }
